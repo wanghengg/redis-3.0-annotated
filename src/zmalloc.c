@@ -85,6 +85,10 @@ void zlibc_free(void *ptr) {
 
 #endif
 
+/** 对于64位系统，sizeof(long)=8, _n&(sizeof(long)-1)=_n&7，实际上就是_n%8，这里之所以
+ * 用位运算是因为位运算更快。这么做的目的是为了使得分配内存的字节数是8的倍数，如果不是的话会通过
+ * _n += sizeof(long)-(_n&(sizeof(long)-1))补到刚好是8的倍数。
+ * **/
 #define update_zmalloc_stat_alloc(__n) do { \
     size_t _n = (__n); \
     if (_n&(sizeof(long)-1)) _n += sizeof(long)-(_n&(sizeof(long)-1)); \
@@ -119,15 +123,21 @@ static void zmalloc_default_oom(size_t size) {
 static void (*zmalloc_oom_handler)(size_t) = zmalloc_default_oom;
 
 void *zmalloc(size_t size) {
+    // 多分配PREFIX_SIZE(sizeof(size_of)，64位系统为8)个字节，用于存储分配内存的大小size
     void *ptr = malloc(size+PREFIX_SIZE);
 
-    if (!ptr) zmalloc_oom_handler(size);
+    if (!ptr) zmalloc_oom_handler(size); // 如果分配未成功，说明发生oom，调用处理函数
 #ifdef HAVE_MALLOC_SIZE
     update_zmalloc_stat_alloc(zmalloc_size(ptr));
     return ptr;
 #else
+    // 前size_t个字节存储分配内存大小size，将void*类型的ptr强制类型转化为size_t*，然后将其
+    // 解引用存储size。这里将指针运用到了极致
     *((size_t*)ptr) = size;
+    // update_zmalloc_stat_alloc是一个宏函数，用于更新已经使用的内存
     update_zmalloc_stat_alloc(size+PREFIX_SIZE);
+    // 这里将ptr移位PREFIX_SIZE位，因为前PREFIX_SIZE位存储的是分配内存的大小，移位后
+    // ptr刚好指向分配后的内存
     return (char*)ptr+PREFIX_SIZE;
 #endif
 }
