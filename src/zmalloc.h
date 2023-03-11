@@ -65,21 +65,21 @@
 #define ZMALLOC_LIB "libc"
 #endif
 
-void *zmalloc(size_t size);
-void *zcalloc(size_t size);
-void *zrealloc(void *ptr, size_t size);
-void zfree(void *ptr);
-char *zstrdup(const char *s);
-size_t zmalloc_used_memory(void);
-void zmalloc_enable_thread_safeness(void);
+void *zmalloc(size_t size); // redis包赚malloc的分配内存的函数
+void *zcalloc(size_t size); // redis包装calloc的分配内存并初始化为0的函数
+void *zrealloc(void *ptr, size_t size); // redis包装realloc的重分配内存的函数
+void zfree(void *ptr); // redis包装free的释放内存的函数
+char *zstrdup(const char *s); // redis包装memcpy的拷贝字符串的函数
+size_t zmalloc_used_memory(void); // 获取已使用的内存大小
+void zmalloc_enable_thread_safeness(void); // 开启线程安全
 void zmalloc_set_oom_handler(void (*oom_handler)(size_t));
-float zmalloc_get_fragmentation_ratio(size_t rss);
-size_t zmalloc_get_rss(void);
+float zmalloc_get_fragmentation_ratio(size_t rss); // 获取内存碎片的比率，这里的rss的redis线程使用的所有内存
+size_t zmalloc_get_rss(void); // 获取当前线程（redis）使用的内存大小
 size_t zmalloc_get_private_dirty(void);
 void zlibc_free(void *ptr);
 
 #ifndef HAVE_MALLOC_SIZE
-size_t zmalloc_size(void *ptr);
+size_t zmalloc_size(void *ptr); // 获取指针ptr占用的内存大小
 #endif
 
 #endif /* __ZMALLOC_H */

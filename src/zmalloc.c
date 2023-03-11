@@ -143,6 +143,7 @@ void *zmalloc(size_t size) {
 }
 
 void *zcalloc(size_t size) {
+    // calloc分配内存并初始化为0
     void *ptr = calloc(1, size+PREFIX_SIZE);
 
     if (!ptr) zmalloc_oom_handler(size);
@@ -175,6 +176,7 @@ void *zrealloc(void *ptr, size_t size) {
 #else
     realptr = (char*)ptr-PREFIX_SIZE;
     oldsize = *((size_t*)realptr);
+    // realloc函数用于重新分配内容
     newptr = realloc(realptr,size+PREFIX_SIZE);
     if (!newptr) zmalloc_oom_handler(size);
 
@@ -238,7 +240,7 @@ size_t zmalloc_used_memory(void) {
 #endif
     }
     else {
-        um = used_memory;
+        um = used_memory; // used_memory是一个静态全局变量
     }
 
     return um;
@@ -269,7 +271,7 @@ void zmalloc_set_oom_handler(void (*oom_handler)(size_t)) {
 #include <fcntl.h>
 
 size_t zmalloc_get_rss(void) {
-    int page = sysconf(_SC_PAGESIZE);
+    int page = sysconf(_SC_PAGESIZE); // 系统PAGESIZE
     size_t rss;
     char buf[4096];
     char filename[256];
@@ -295,7 +297,7 @@ size_t zmalloc_get_rss(void) {
     if (!x) return 0;
     *x = '\0';
 
-    rss = strtoll(p,NULL,10);
+    rss = strtoll(p,NULL,10); // 占用的内存页数(page)
     rss *= page;
     return rss;
 }
@@ -332,6 +334,7 @@ size_t zmalloc_get_rss(void) {
 
 /* Fragmentation = RSS / allocated-bytes */
 float zmalloc_get_fragmentation_ratio(size_t rss) {
+    // rss是redis线程使用的使用内存，rss/used_memory计算出内存碎片比率
     return (float)rss/zmalloc_used_memory();
 }
 
