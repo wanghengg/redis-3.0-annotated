@@ -63,6 +63,8 @@
  * You can print the string with printf() as there is an implicit \0 at the
  * end of the string. However the string is binary safe and can contain
  * \0 characters in the middle, as the length is stored in the sds header. */
+/* 这里注意简单动态字符串可以直接使用printf打印，因为其包含的string是以\0结尾的，同时sds允许
+在中间包含\0，因为它的长度用结构体的len表示*/
 sds sdsnewlen(const void *init, size_t initlen) {
 
     struct sdshdr *sh;
@@ -71,6 +73,7 @@ sds sdsnewlen(const void *init, size_t initlen) {
     // T = O(N)
     if (init) {
         // zmalloc 不初始化所分配的内存
+        // 这里多余的+1是为了存储\0
         sh = zmalloc(sizeof(struct sdshdr)+initlen+1);
     } else {
         // zcalloc 将分配的内存全部初始化为 0
