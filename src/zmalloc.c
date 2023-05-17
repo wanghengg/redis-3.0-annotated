@@ -45,10 +45,10 @@ void zlibc_free(void *ptr) {
 #include "zmalloc.h"
 
 #ifdef HAVE_MALLOC_SIZE
-#define PREFIX_SIZE (0)
+#define PREFIX_SIZE (0) // 定义多分配的字节数，由于使用jemalloc，有zmalloc_size函数，不需要多分配内存存储malloc的字节长度，所以为0
 #else
 #if defined(__sun) || defined(__sparc) || defined(__sparc__)
-#define PREFIX_SIZE (sizeof(long long))
+#define PREFIX_SIZE (sizeof(long long)) // 需要多分配sizeof(long long)个字节存储malloc的字节长度
 #else
 #define PREFIX_SIZE (sizeof(size_t))
 #endif

@@ -79,7 +79,7 @@ size_t zmalloc_get_private_dirty(void);
 void zlibc_free(void *ptr);
 
 #ifndef HAVE_MALLOC_SIZE
-size_t zmalloc_size(void *ptr); // 获取指针ptr占用的内存大小
+size_t zmalloc_size(void *ptr); // 获取指针ptr占用的内存大小，自定义zmalloc_size函数，如果使用tcmalloc、jemalloc以及Apple的malloc.h已经有对应函数，不需要再实现
 #endif
 
 #endif /* __ZMALLOC_H */

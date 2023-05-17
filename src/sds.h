@@ -46,6 +46,13 @@ typedef char *sds;
 
 /*
  * 保存字符串对象的结构
+ * sizeof(sdshdr)=8，char buf[]被称为flexible array member
+ * Flexible array members are a special type of array in which the 
+ * last element of a structure with more than one named member has 
+ * an incomplete array type; that is, the size of the array is not 
+ * specified explicitly within the structure.
+ * flexible array是 C99 引入的，作为struct的最后一个成员，并且为明确指定数组大小，所以它的
+ * 大小是动态的（可能在运行时被更改）
  */
 struct sdshdr {
     
@@ -65,6 +72,7 @@ struct sdshdr {
  * T = O(1)
  */
 static inline size_t sdslen(const sds s) {
+    // sizeof(struct sdshdr) = 8，使用了flexible array member
     struct sdshdr *sh = (void*)(s-(sizeof(struct sdshdr)));
     return sh->len;
 }
