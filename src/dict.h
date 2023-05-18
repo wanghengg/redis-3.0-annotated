@@ -195,10 +195,15 @@ typedef void (dictScanFunction)(void *privdata, const dictEntry *de);
 
 /* ------------------------------- Macros ------------------------------------*/
 // 释放给定字典节点的值
+// 单条语句就不需要用do{...}while(0)这种形式包装，以为其语义不会在宏展开时变化
 #define dictFreeVal(d, entry) \
     if ((d)->type->valDestructor) \
         (d)->type->valDestructor((d)->privdata, (entry)->v.val)
 
+/*
+* 宏定义有多条语句时，使用do{...}while(0)可以保证无论什么情况宏展开，其语义都不会变化。
+* 本质上相当于把多条语句包装为一条do{...}while(0)语句
+*/
 // 设置给定字典节点的值
 #define dictSetVal(d, entry, _val_) do { \
     if ((d)->type->valDup) \
