@@ -430,7 +430,7 @@ list *listDup(list *orig)
                 return NULL;
             }
         } else
-            value = node->value;
+            value = node->value; // 如果没有节点值拷贝函数，直接将新节点的value指针指向原来节点值，不额外分配内存
 
         // 将节点添加到链表
         if (listAddNodeTail(copy, value) == NULL) {
@@ -477,7 +477,7 @@ listNode *listSearchKey(list *list, void *key)
     iter = listGetIterator(list, AL_START_HEAD);
     while((node = listNext(iter)) != NULL) {
         
-        // 对比
+        // 对比，如果有match函数，使用match函数进行匹配，如果没有设置match函数直接匹配两个指针
         if (list->match) {
             if (list->match(node->value, key)) {
                 listReleaseIterator(iter);
