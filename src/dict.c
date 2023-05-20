@@ -66,6 +66,10 @@
  * 那么 rehash 仍然会（强制）进行。
  */
 // 指示字典是否启用 rehash 的标识
+/* 
+* static修饰的全局变量或者 function 作用域仅限于当前文件，其他文件不能访问该变量或 function
+* 可以用来限制变量或者function 是私有的
+*/
 static int dict_can_resize = 1;
 // 强制 rehash 的比率
 static unsigned int dict_force_resize_ratio = 5;
@@ -400,7 +404,7 @@ int dictRehash(dict *d, int n) {
             // 计算新哈希表的哈希值，以及节点插入的索引位置
             h = dictHashKey(d, de->key) & d->ht[1].sizemask;
 
-            // 插入节点到新哈希表
+            // 插入节点到新哈希表，每次插在链表最前面
             de->next = d->ht[1].table[h];
             d->ht[1].table[h] = de;
 
@@ -1098,15 +1102,18 @@ dictEntry *dictGetRandomKey(dict *d)
 /* This is a version of dictGetRandomKey() that is modified in order to
  * return multiple entries by jumping at a random place of the hash table
  * and scanning linearly for entries.
+ * 通过线性扫描的方式获取count个key
  *
  * Returned pointers to hash table entries are stored into 'des' that
  * points to an array of dictEntry pointers. The array must have room for
  * at least 'count' elements, that is the argument we pass to the function
  * to tell how many random elements we need.
+ * des用于储存随机线性扫描到的dict entry，其空间至少不小于sizeof(dictEntry*)*count
  *
  * The function returns the number of items stored into 'des', that may
  * be less than 'count' if the hash table has less than 'count' elements
  * inside.
+ * 如果哈希表的元素总数小于count，那么最终返回的元素个数可能小于count
  *
  * Note that this function is not suitable when you need a good distribution
  * of the returned items, but only when you need to "sample" a given number
@@ -1184,7 +1191,7 @@ static unsigned long rev(unsigned long v) {
  * 但一个元素可能会被返回多次。
  *
  * For every element returned, the callback 'fn' passed as argument is
- * called, with 'privdata' as first argument and the dictionar entry
+ * called, with 'privdata' as first argument and the dictionary entry
  * 'de' as second argument.
  *
  * 每当一个元素被返回时，回调函数 fn 就会被执行，
